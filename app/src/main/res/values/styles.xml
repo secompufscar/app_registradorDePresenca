@@ -1,0 +1,15 @@
+<resources>
+    <color name="white_opaque">#FFFFFFFF</color>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!--<item name="android:background">@color/white_opaque</item> -->
+          <item name="android:windowBackground">@color/white_opaque</item>
+        <!--  <item name="android:colorBackground">@color/white_opaque</item>-->
+      </style>
+    <style name="Theme.AppCompat.Light.NoActionBar.NoTitle" parent="@style/Theme.AppCompat.Light">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+  </resources>

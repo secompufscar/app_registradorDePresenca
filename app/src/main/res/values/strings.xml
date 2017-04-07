@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Registrador de Presenças</string>
+    <string name="title_activity_descricao_evento">DescricaoEvento</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="LightOff">Light: off</string>
+    <string name="LightOn">Light: on</string>
+    <string name="Back">Back</string>
+
+</resources>

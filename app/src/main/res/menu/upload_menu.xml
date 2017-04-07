@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:appNs="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/upload_button"
+        android:icon="@mipmap/upload_icon"
+        android:title="Upload"
+        appNs:showAsAction="ifRoom"
+        />
+    <item android:id="@+id/refresh_button"
+        android:icon="@mipmap/refresh_icon"
+        android:title="Atualizar"
+        appNs:showAsAction="never"
+        />
+    <item android:id="@+id/menu_credenciamento"
+        android:icon="@mipmap/refresh_icon"
+        android:title="Credenciamento"
+        appNs:showAsAction="never"
+        />
+    <item android:id="@+id/menu_verificar"
+        android:icon="@mipmap/refresh_icon"
+        android:title="Verificar Código"
+        appNs:showAsAction="never"
+        />
+</menu>
