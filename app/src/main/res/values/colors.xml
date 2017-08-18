@@ -1,4 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="background_custom_skin">#77000000</color>
+
+    <color name="colorPrimary">#FFF</color>
+    <color name="colorPrimaryDark">#1a3f72</color>
+    <color name="colorAccent">#3f6db3</color>
+
+    <!-- Definições de texto -->
+    <color name="primaryText">#212121</color>
+    <color name="secondaryText">#757575</color>
+    <color name="detalhesHeaderText">#FFF</color>
+    <color name="detalhesTituloText">#3f6db3</color>
+
+    <color name="white">#FFF</color>
+
+
+    <color name="icons">#212121</color>
+    <color name="divider">#bdbdbd</color>
+    <color name="colorBackSplash">#FFF</color>
+    <color name="colorButton">#378540</color>
+
+    <!--Cores dos tipos de atividade-->
+    <color name="palestraColor">#1a3f72</color>
+    <!--<color name="workshopColor">#000000</color>-->
+    <color name="minicursoColor">#5bb247</color>
+    <!--<color name="mesaredondaColor">#2185d0</color>-->
+    <color name="atividadeDefaultColor">#414141</color>
+
 </resources>

@@ -3,16 +3,10 @@ package br.com.secompufscar.presenceregister;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.microblink.activity.Pdf417ScanActivity;
 import com.microblink.recognizers.blinkbarcode.pdf417.Pdf417RecognizerSettings;
-import com.microblink.recognizers.settings.RecognitionSettings;
 import com.microblink.recognizers.settings.RecognizerSettings;
 
 import org.json.JSONArray;
@@ -22,9 +16,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * Created by Italo on 20/03/2016.
- */
 public class ListaEventos extends AppCompatActivity implements ExpandableListView.OnChildClickListener{
     private HashMap<Integer,ArrayList<Evento>> dados;
     private ExpandableListView expandableView;
@@ -50,8 +41,6 @@ public class ListaEventos extends AppCompatActivity implements ExpandableListVie
             e.printStackTrace();
         }
 
-
-
         setTitle("Eventos");
         expandableView=(ExpandableListView) findViewById(R.id.expandableListView);
         dados=new HashMap<>();
@@ -74,7 +63,7 @@ public class ListaEventos extends AppCompatActivity implements ExpandableListVie
 
 
         Evento evento=Evento.getEventsInADayOfWeek( daysOfWeek.get(groupPosition) ,listaEventos ).get(childPosition);
-        Intent intent =new Intent(this,DescricaoEvento.class);
+        Intent intent =new Intent(this,AtividadeDetalhes.class);
         intent.putExtra("JSONInfo",evento.encodeAsJSON());
         startActivity(intent);
 
@@ -99,6 +88,7 @@ public class ListaEventos extends AppCompatActivity implements ExpandableListVie
         auxView=v;*/
         return false;
     }
+
     private RecognizerSettings[] setupSettingsArray() {
         Pdf417RecognizerSettings sett = new Pdf417RecognizerSettings();
         // disable scanning of white barcodes on black background
@@ -113,7 +103,6 @@ public class ListaEventos extends AppCompatActivity implements ExpandableListVie
         // recognition
         return new RecognizerSettings[] { sett };
     }
-
 
 }
 

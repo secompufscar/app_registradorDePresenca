@@ -78,6 +78,7 @@ public class Evento {
     public void setMinistrante(String ministrante){
         this.ministrante=ministrante;
     }
+
     public void setData(String datal){
         GregorianCalendar cal = new GregorianCalendar();
         int ano=2016;

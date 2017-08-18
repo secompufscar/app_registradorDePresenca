@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.AsyncTask;
@@ -35,7 +34,6 @@ import com.microblink.recognizers.blinkbarcode.pdf417.Pdf417ScanResult;
 import com.microblink.recognizers.settings.RecognitionSettings;
 import com.microblink.results.barcode.BarcodeDetailedData;
 import com.microblink.util.CameraPermissionManager;
-import com.microblink.view.BaseCameraView;
 import com.microblink.view.CameraAspectMode;
 import com.microblink.view.CameraEventsListener;
 import com.microblink.view.OrientationAllowedListener;
@@ -57,45 +55,69 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.TimeZone;
+
+import br.com.secompufscar.presenceregister.data.DataBase;
+import br.com.secompufscar.presenceregister.data.Presenca;
 
 public class DefaultScanActivity extends Activity implements ScanResultListener, CameraEventsListener, MetadataListener {
-    private String dadosEscaneados;
+    public static final String EXTRA_ID_ATIVIDADE = "id_atividade";
+
+    //    private String dadoEscaneado;
+    private String codigo_atividade;
     private int mScanCount = 0;
     private Handler mHandler = new Handler();
-    private final   String  URLSECOMP="https://secompufscar.com.br/2016/app/";
-    /** RecognizerView is the builtin view that controls camera and recognition */
+    /**
+     * RecognizerView is the builtin view that controls camera and recognition
+     */
     private RecognizerView mRecognizerView;
-    /** CameraPermissionManager is provided helper class that can be used to obtain the permission to use camera.
+    /**
+     * CameraPermissionManager is provided helper class that can be used to obtain the permission to use camera.
      * It is used on Android 6.0 (API level 23) or newer.
      */
     private CameraPermissionManager mCameraPermissionManager;
-    /** This is built-in helper for built-in view that draws detection location */
+    /**
+     * This is built-in helper for built-in view that draws detection location
+     */
     QuadViewManager mQvManager = null;
-    /** This is a builtin point set view that can visualize points of interest, such as those of QR code */
+    /**
+     * This is a builtin point set view that can visualize points of interest, such as those of QR code
+     */
     private PointSetView mPointSetView;
-    /** This is a holder for buttons layout inflated from XML */
+    /**
+     * This is a holder for buttons layout inflated from XML
+     */
     private View mLayout;
-    /** This is a back button */
+    /**
+     * This is a back button
+     */
     private Button mBackButton = null;
-    /** This is a torch button */
+    /**
+     * This is a torch button
+     */
     private Button mTorchButton = null;
-    /** This variable holds the torch state */
+    /**
+     * This variable holds the torch state
+     */
     private boolean mTorchEnabled = false;
-    private String eventoID;
     private Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default_scan);
-        context=this;
+        context = this;
         // create a scanner view
         mRecognizerView = (RecognizerView) findViewById(R.id.recognizerView);
-        eventoID=this.getIntent().getStringExtra("CodigoEvento");
+        codigo_atividade = this.getIntent().getStringExtra(EXTRA_ID_ATIVIDADE);
         Bundle extras = getIntent().getExtras();
-        if(extras != null) {
+        if (extras != null) {
             // setup scanner parameters
             try {
                 mRecognizerView.setLicenseKey(extras.getString(Pdf417ScanActivity.EXTRAS_LICENSE_KEY));
@@ -158,7 +180,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
         // each of them can be found in javadoc. This method automatically adds the QuadView as a
         // child of RecognizerView.
         // Here we use preset which sets up quad view in the same style as used in built-in PDF417 ScanActivity.
-        mQvManager= QuadViewManagerFactory.createQuadViewFromPreset(mRecognizerView, QuadViewPreset.DEFAULT_CORNERS_FROM_PDF417_SCAN_ACTIVITY);
+        mQvManager = QuadViewManagerFactory.createQuadViewFromPreset(mRecognizerView, QuadViewPreset.DEFAULT_CORNERS_FROM_PDF417_SCAN_ACTIVITY);
 
         // create PointSetView
         mPointSetView = new PointSetView(this, null, mRecognizerView.getHostScreenOrientation());
@@ -192,10 +214,10 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
         mRecognizerView.addChildView(mLayout, true);
 
         // if ROI is set, then create and add ROI layout
-        if(extras != null) {
+        if (extras != null) {
             boolean rotateRoi = extras.getBoolean(Pdf417ScanActivity.EXTRAS_ROTATE_ROI);
             Rectangle roi = extras.getParcelable(Pdf417ScanActivity.EXTRAS_ROI);
-            if(roi != null) {
+            if (roi != null) {
                 // tell scanner to use ROI
                 mRecognizerView.setScanningRegion(roi, rotateRoi);
 
@@ -210,7 +232,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
     protected void onStart() {
         super.onStart();
         // all activity lifecycle events must be passed on to RecognizerView
-        if(mRecognizerView != null) {
+        if (mRecognizerView != null) {
             mRecognizerView.start();
         }
     }
@@ -219,7 +241,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
     protected void onResume() {
         super.onResume();
         // all activity lifecycle events must be passed on to RecognizerView
-        if(mRecognizerView != null) {
+        if (mRecognizerView != null) {
             mRecognizerView.resume();
         }
     }
@@ -228,7 +250,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
     protected void onPause() {
         super.onPause();
         // all activity lifecycle events must be passed on to RecognizerView
-        if(mRecognizerView != null) {
+        if (mRecognizerView != null) {
             mRecognizerView.pause();
         }
     }
@@ -237,7 +259,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
     protected void onStop() {
         super.onStop();
         // all activity lifecycle events must be passed on to RecognizerView
-        if(mRecognizerView != null) {
+        if (mRecognizerView != null) {
             mRecognizerView.stop();
         }
     }
@@ -246,7 +268,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
     protected void onDestroy() {
         super.onDestroy();
         // all activity lifecycle events must be passed on to RecognizerView
-        if(mRecognizerView != null) {
+        if (mRecognizerView != null) {
             mRecognizerView.destroy();
         }
     }
@@ -274,7 +296,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
         // if device supports torch, make torch button visible and setup it
         // isCameraTorchSupported returns true if device supports controlling the torch and
         // camera preview is active
-        if(mRecognizerView.isCameraTorchSupported()) {
+        if (mRecognizerView.isCameraTorchSupported()) {
             mTorchButton.setVisibility(View.VISIBLE);
             mTorchButton.setOnClickListener(new View.OnClickListener() {
 
@@ -312,7 +334,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
     @Override
     public void onAutofocusFailed() {
         // this method is called when camera autofocus fails
-    //    Toast.makeText(this, "Autofocus failed", Toast.LENGTH_SHORT).show();
+        //    Toast.makeText(this, "Autofocus failed", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -351,11 +373,11 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
                     // (internally displays FAIL status)
                     mQvManager.animateQuadToDefaultPosition();
                 }
-            // when points of interested have been detected (e.g. QR code), this will be returned as PointsDetectorResult
+                // when points of interested have been detected (e.g. QR code), this will be returned as PointsDetectorResult
             } else if (detectorResult instanceof PointsDetectorResult) {
                 // show the points of interest inside points view
                 mPointSetView.setPointsDetectionResult((PointsDetectorResult) detectorResult);
-            // when object represented by quadrilateral is detected, this will be returned as QuadDetectorResult
+                // when object represented by quadrilateral is detected, this will be returned as QuadDetectorResult
             } else if (detectorResult instanceof QuadDetectorResult) {
                 // begin quadrilateral animation to detected quadrilateral
                 mQvManager.animateQuadToDetectionPosition((QuadDetectorResult) detectorResult);
@@ -381,40 +403,41 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
         mRecognizerView.pauseScanning();
         BaseRecognitionResult[] resultArray = results.getRecognitionResults();
 
-        StringBuilder  sb2= new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
 
-        for(BaseRecognitionResult res : resultArray) {
+        for (BaseRecognitionResult res : resultArray) {
 
-            if(res instanceof Pdf417ScanResult) { // check if scan result is result of Pdf417 recognizer
+            if (res instanceof Pdf417ScanResult) { // check if scan result is result of Pdf417 recognizer
                 Pdf417ScanResult result = (Pdf417ScanResult) res;
                 // getStringData getter will return the string version of barcode contents
-                String barcodeData = dadosEscaneados = result.getStringData();
+                String barcodeData = result.getStringData();
+
+                Toast.makeText(getBaseContext(), barcodeData, Toast.LENGTH_SHORT).show();
 
                 // isUncertain getter will tell you if scanned barcode contains some uncertainties
                 boolean uncertainData = result.isUncertain();
                 // getRawData getter will return the raw data information object of barcode contents
                 BarcodeDetailedData rawData = result.getRawData();
+
                 // BarcodeDetailedData contains information about barcode's binary layout, if you
                 // are only interested in raw bytes, you can obtain them with getAllData getter
-                GregorianCalendar calendar=(GregorianCalendar) GregorianCalendar.getInstance();
-                String jsondate= String.format("{\"dia\": \"%s\",\"mes\":\"%s\",\"horas\":\"%s\",\"minutos\":\"%s\"" +
-                        ",\"segundos\":\"%s\"}",
-                        String.valueOf(calendar.get(GregorianCalendar.DAY_OF_MONTH)),
-                        String.valueOf(calendar.get(GregorianCalendar.MONTH) + 1),
-                        String.valueOf(calendar.get(GregorianCalendar.HOUR)),
-                        String.valueOf(calendar.get(GregorianCalendar.MINUTE)),
-                        String.valueOf(calendar.get(GregorianCalendar.SECOND)));
+
                 if (!uncertainData) {
-                if (hostIsAvailable()) {
-                        new PostTask().execute();
+                    if (NetworkUtils.updateConnectionState(getBaseContext())) {
+                        new PostTask().execute(barcodeData);
+                        Log.d("teste", "inside if");
                     } else {
-                        if(!eventoID.equals("0")&&!eventoID.equals("-1")) {
-                            DataBase db = new DataBase(this);
-                            db.insertPresenca(dadosEscaneados, eventoID, jsondate);
-                            Toast.makeText(this,"Não foi possivel conectar-se ao servidor, o registro foi armazenado localmente",Toast.LENGTH_LONG).show();
-                            Log.d("base_de_dados", dadosEscaneados);
-                        }else{
-                            Toast.makeText(this,"Impossível conectar ao servidor. Verifique sua conexão com a internet",Toast.LENGTH_LONG).show();
+                        if (!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")) {
+                            Presenca presenca = new Presenca();
+                            presenca.setIdParticipante(barcodeData);
+                            presenca.setIdAtividade(codigo_atividade);
+                            presenca.setHorario(Presenca.getCurrentTime());
+
+                            DataBase.getDB().insertPresenca(presenca);
+
+                            Toast.makeText(this, R.string.msg_armazenado_localmente, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(this, R.string.msg_impossivel_conectar, Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -448,7 +471,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
                 .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(dialog != null) {
+                        if (dialog != null) {
                             dialog.dismiss();
                         }
                         setResult(RESULT_CANCELED);
@@ -476,34 +499,37 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
         mCameraPermissionManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private boolean hostIsAvailable(){
-        Runtime runtime = Runtime.getRuntime();
-        try {
 
-            Process ipProcess = runtime.exec("/system/bin/ping -c 1 " +"secompufscar.com.br");
-            int     exitValue = ipProcess.waitFor();
-            return (exitValue == 0);
+    class PostTask extends AsyncTask<String, String, String> {
 
-        } catch (IOException e)          { e.printStackTrace(); }
-        catch (InterruptedException e) { e.printStackTrace(); }
+        protected String doInBackground(String... dadoEscaneado) {
 
-        return false;
-    }
+            Presenca presenca = new Presenca();
+            presenca.setIdAtividade(codigo_atividade);
+            presenca.setIdParticipante(dadoEscaneado[0]);
 
+            presenca.setHorario(Presenca.getCurrentTime());
 
-    class PostTask extends AsyncTask<String,String,String> {
+            Log.d("TESTE", presenca.toString());
+
+            NetworkUtils.postPresenca(getBaseContext(), presenca);
+
+            return null;
+        }
 
         @Override
-        protected void onPostExecute(String output){
-            if(!output.equals("timeOutException")) {
+        protected void onPostExecute(String output) {
+
+            //Todo: precisamos da padronização da api para tratar aqui
+            if (!output.equals("timeOutException")) {
                 try {
                     String toastString;
                     JSONObject jsonObj = new JSONObject(output);
                     if (jsonObj.getString("status").equals("OK")) {
                         toastString = jsonObj.getString("nome_usuario");
-                        if (eventoID.equals("0"))
+                        if (codigo_atividade.equals("0"))
                             toastString = toastString + " crendenciado com sucesso!";
-                        else if (!eventoID.equals("-1"))
+                        else if (!codigo_atividade.equals("-1"))
                             toastString = "Presença de " + toastString + " confirmada!";
 
                     } else {
@@ -513,68 +539,9 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-            }else{
-                Toast.makeText(context,"Tente Novamente",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(context, "Tente Novamente", Toast.LENGTH_SHORT).show();
             }
-
-        }
-        protected String doInBackground(String... strings) {
-            String charset = "UTF-8";  // Or in Java 7 and later, use the constant: java.nio.charset.StandardCharsets.UTF_8.name()
-            String param1 =dadosEscaneados;
-
-            String param2 = eventoID;
-
-            GregorianCalendar calendar= (GregorianCalendar) GregorianCalendar.getInstance();
-            String query = null;
-            String responseBody="";
-            try {
-                query = String.format("id_usuario=%s&id_atividade=%s&dia=%s&mes=%s&horas=%s&minutos=%s&segundos=%s",
-                        URLEncoder.encode(param1, charset),
-                        URLEncoder.encode(param2, charset),
-                        URLEncoder.encode(String.valueOf(calendar.get(GregorianCalendar.DAY_OF_MONTH) ), charset),
-                        URLEncoder.encode(String.valueOf(calendar.get(GregorianCalendar.MONTH) + 1),charset),
-                        URLEncoder.encode(String.valueOf(calendar.get(GregorianCalendar.HOUR) ), charset),
-                        URLEncoder.encode(String.valueOf(calendar.get(GregorianCalendar.MINUTE) ), charset),
-                        URLEncoder.encode(String.valueOf(calendar.get(GregorianCalendar.SECOND) ),charset)
-                        );
-            } catch (UnsupportedEncodingException e) {
-                Log.d("datedebug", e.getMessage());
-
-            }
-
-            URLConnection connection = null;
-            OutputStream output= null;
-            try {
-                connection = new URL(URLSECOMP).openConnection();
-                connection.setDoOutput(true); // Triggers POST.
-                connection.setRequestProperty("Accept-Charset", charset);
-                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
-
-                output = connection.getOutputStream();
-                output.write(query.getBytes(charset));
-
-                InputStream response = connection.getInputStream();
-                Scanner scanner = new Scanner(response);
-                responseBody = scanner.useDelimiter("\\A").next();
-                Log.d("httpconnection", responseBody);
-
-
-            } catch (MalformedURLException e) {
-                Log.d("httpconnectionerror", e.getMessage());
-            } catch (UnsupportedEncodingException e) {
-                Log.d("httpconnectionerror", e.getMessage());
-            } catch (IOException e) {
-                Log.d("httpconnectionerror", e.getMessage());
-                responseBody="timeOutException";
-            }finally{
-                try {
-                    if(output!=null)
-                        output.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return responseBody;
         }
     }
 

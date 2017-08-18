@@ -1,11 +1,19 @@
 <resources>
     <string name="app_name">Registrador de Presenças</string>
-    <string name="title_activity_descricao_evento">DescricaoEvento</string>
+    <string name="title_activity_atividade_detalhe">Detalhe da Atividade</string>
+    <string name="title_activity_atividades">Lista de Atividades</string>
 
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+
+    <string name="action_settings">Configurações</string>
     <string name="LightOff">Light: off</string>
     <string name="LightOn">Light: on</string>
     <string name="Back">Back</string>
+
+    <string name="atividade_indisponivel_local">Local indisponível</string>
+
+    <string name="msg_armazenado_localmente">Não foi possivel conectar-se ao servidor, o registro foi armazenado localmente</string>
+    <string name="msg_impossivel_conectar">Impossível conectar ao servidor. Verifique sua conexão com a internet</string>
+
+
 
 </resources>
