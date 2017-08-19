@@ -412,6 +412,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
                 // getStringData getter will return the string version of barcode contents
                 String barcodeData = result.getStringData();
 
+                //TODO: Remover esse teste
                 Toast.makeText(getBaseContext(), barcodeData, Toast.LENGTH_SHORT).show();
 
                 // isUncertain getter will tell you if scanned barcode contains some uncertainties
@@ -423,9 +424,9 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
                 // are only interested in raw bytes, you can obtain them with getAllData getter
 
                 if (!uncertainData) {
+                    // TODO: Temos que ajustar essa verificação, pode ser que esteja conectado porem sem resposta do servidor
                     if (NetworkUtils.updateConnectionState(getBaseContext())) {
                         new PostTask().execute(barcodeData);
-                        Log.d("teste", "inside if");
                     } else {
                         if (!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")) {
                             Presenca presenca = new Presenca();
@@ -510,23 +511,27 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
 
             presenca.setHorario(Presenca.getCurrentTime());
 
-            Log.d("TESTE", presenca.toString());
+            String response = NetworkUtils.postPresenca(getBaseContext(), presenca);
 
-            NetworkUtils.postPresenca(getBaseContext(), presenca);
-
-            return null;
+            if(!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")){
+                if(response.isEmpty()){
+                    DataBase.getDB().insertPresenca(presenca);
+                    Log.d("teste", "salvando presenca no banco");
+                }
+            }
+            return response;
         }
 
         @Override
-        protected void onPostExecute(String output) {
-
+        protected void onPostExecute(String response) {
             //Todo: precisamos da padronização da api para tratar aqui
-            if (!output.equals("timeOutException")) {
+            if (!response.isEmpty()) {
                 try {
                     String toastString;
-                    JSONObject jsonObj = new JSONObject(output);
+                    JSONObject jsonObj = new JSONObject(response);
+
                     if (jsonObj.getString("status").equals("OK")) {
-                        toastString = jsonObj.getString("nome_usuario");
+                        toastString = jsonObj.getString("nome");
                         if (codigo_atividade.equals("0"))
                             toastString = toastString + " crendenciado com sucesso!";
                         else if (!codigo_atividade.equals("-1"))

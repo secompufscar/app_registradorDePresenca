@@ -78,8 +78,6 @@ public class DataBase extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE, null);
-        db.close();
-
         cursor.moveToFirst();
 
         do {
@@ -93,6 +91,7 @@ public class DataBase extends SQLiteOpenHelper {
             presencas.add(presenca);
         } while (cursor.moveToNext());
 
+        db.close();
         return presencas;
     }
 

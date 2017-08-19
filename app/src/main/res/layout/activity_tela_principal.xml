@@ -3,33 +3,22 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:fitsSystemWindows="true"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".TelaPrincipal">
 
     <LinearLayout
         android:id="@+id/LinearLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="@dimen/activity_vertical_margin">
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="300dp"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:adjustViewBounds="true"
             android:src="@mipmap/secomp" />
-
-        <!--<TextView-->
-            <!--android:id="@+id/textView2"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="center_horizontal"-->
-            <!--android:text="Selecione u opção"-->
-            <!--android:textAppearance="?android:attr/textAppearanceLarge" />-->
 
         <GridLayout
             android:id="@+id/botoes_grid"
@@ -62,11 +51,40 @@
 
     </LinearLayout>
 
-    <ProgressBar android:id="@+id/loading_spinner"
+    <ProgressBar
+        android:id="@+id/loading_spinner"
         style="?android:progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:progressTint="@color/colorAccent"/>
+        android:progressTint="@color/colorAccent" />
+
+    <LinearLayout
+        android:id="@+id/msg_bar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_gravity="bottom"
+        android:background="@color/colorMsgBar"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:textColor="@color/white"
+            android:id="@+id/msg"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="2"
+            android:padding="10dp"
+            android:text="Mensagem de erro aqui" />
+
+        <Button
+            android:id="@+id/msg_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:text="Enviar" />
+
+    </LinearLayout>
 
 </FrameLayout>

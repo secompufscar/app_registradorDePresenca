@@ -44,8 +44,7 @@ public class Atividade {
     public final static String TAG_DATAHORA_FIM = "data_hora_fim";
 
 
-    public final static String API_URL = "api/atividades/";
-    public final static String RESUMO_URL = API_URL + "?ministrantes_resumo=True/";
+    public final static String RESUMO_URL = NetworkUtils.API_PATH + "atividades/?ministrantes_resumo=True/";
 
     class Horario {
 

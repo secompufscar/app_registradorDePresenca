@@ -6,6 +6,9 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,16 +30,16 @@ public class NetworkUtils {
 
     public static String LICENSE_KEY;
     public static final String BASE_URL = "https://secompufscar.com.br/";
-    public static final String API_PATH = "api/";
-    public static final String POST_PATH = API_PATH;
+    public static final String API_PATH = BASE_URL + "api/";
+    public static final String POST_PATH = "http://192.168.1.173:3000/presencas";
 
-    public static void inicializeNetworkUtils(String licenseKey){
+    public static void inicializeNetworkUtils(String licenseKey) {
         LICENSE_KEY = licenseKey;
     }
 
     public static URL buildUrl(String path) {
 
-        Uri builtUri = Uri.parse(BASE_URL + path).buildUpon().build();
+        Uri builtUri = Uri.parse(path).buildUpon().build();
 
         URL url = null;
 
@@ -82,19 +85,19 @@ public class NetworkUtils {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                return null;
+                return "";
             } finally {
                 urlConnection.disconnect();
             }
         } else {
-            return null;
+            return "";
         }
     }
 
     public static boolean hostIsAvailable(Context context) {
 
-        if(updateConnectionState(context)){
-            Log.d("teste","Conectado");
+        if (updateConnectionState(context)) {
+            Log.d("teste", "Conectado");
 
             Runtime runtime = Runtime.getRuntime();
             try {
@@ -112,30 +115,31 @@ public class NetworkUtils {
     }
 
     public static String postPresenca(Context context, Presenca presenca) {
-
         if (updateConnectionState(context)) {
             String charset = "UTF-8";
-            String query;
             String responseBody = null;
             OutputStream output = null;
 
             try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.accumulate("id", presenca.getId());
+                jsonObject.accumulate("id_atividade", presenca.getIdAtividade());
+                jsonObject.accumulate("id_inscricao", presenca.getIdParticipante());
+                jsonObject.accumulate("timestamp", presenca.getHorario());
 
-                query = String.format("id_participante=%s&id_atividade=%s&horario=%s",
-                        URLEncoder.encode(presenca.getIdParticipante(), charset),
-                        URLEncoder.encode(presenca.getIdAtividade(), charset),
-                        URLEncoder.encode(presenca.getHorario(), charset));
-
-                Log.d("TESTE query", query);
+                String query = jsonObject.toString();
 
                 URL post_url = buildUrl(POST_PATH);
 
                 if (post_url != null) {
+                    Log.d("TESTE url", post_url.toString());
+
                     HttpURLConnection connection = (HttpURLConnection) post_url.openConnection();
 
                     connection.setDoOutput(true); // Triggers POST.
                     connection.setRequestProperty("Accept-Charset", charset);
-                    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset);
+                    connection.setRequestProperty("Content-Type", "application/json");
+
                     connection.setConnectTimeout(2000);
 
                     output = connection.getOutputStream();
@@ -145,18 +149,17 @@ public class NetworkUtils {
                     Scanner scanner = new Scanner(response);
                     responseBody = scanner.useDelimiter("\\A").next();
 
-                    Log.d("httpconnection", responseBody);
-
+                    Log.d("teste response", responseBody);
                 }
 
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             } catch (SocketTimeoutException e) {
-                Log.d("httpconnectionesocket", e.getMessage());
-                responseBody = "timeOutException";
+                Log.d("teste timeoutexception", e.getMessage());
             } catch (IOException e) {
-                Log.d("httpconnectionerror3", e.getMessage());
-                responseBody = "timeOutException";
+                Log.d("teste ioexception", e.getMessage());
+            } catch (JSONException e) {
+                Log.d("teste jsonexception", e.toString());
             } finally {
                 try {
                     if (output != null)
@@ -173,20 +176,13 @@ public class NetworkUtils {
 
     public static boolean postAllPresencas(Context context) {
         if (updateConnectionState(context)) {
-
             ArrayList<Presenca> presencas = DataBase.getDB().getAllEntries();
             for (Presenca presenca : presencas) {
-                postPresenca(context, presenca);
+                String response = postPresenca(context, presenca);
                 // TODO: Verificar se deu certo e excluir;
                 DataBase.getDB().deleteEntry(presenca.getId());
             }
-
-            //TODO: Tratar isso
-//        uploadPD = ProgressDialog.show(context, "Sincronizando registros de presenças", "");
-//        uploadPD.setMax(cursor.getCount());
-//        uploadPD.setProgress(0);
             return true;
-
         } else {
             return false;
         }

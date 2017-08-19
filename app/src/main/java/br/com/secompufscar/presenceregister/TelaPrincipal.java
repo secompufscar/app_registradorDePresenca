@@ -1,11 +1,8 @@
 package br.com.secompufscar.presenceregister;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,8 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.microblink.activity.Pdf417ScanActivity;
@@ -23,42 +19,26 @@ import com.microblink.recognizers.blinkbarcode.pdf417.Pdf417RecognizerSettings;
 import com.microblink.recognizers.settings.RecognitionSettings;
 import com.microblink.recognizers.settings.RecognizerSettings;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 
 import br.com.secompufscar.presenceregister.data.Atividade;
 import br.com.secompufscar.presenceregister.data.DataBase;
 
 import static br.com.secompufscar.presenceregister.data.Atividade.inicializaAtividadesMap;
 
-public class TelaPrincipal extends AppCompatActivity implements View.OnClickListener {
+public class TelaPrincipal extends AppCompatActivity {
 
     public static HashMap<String, List<Atividade>> atividadesHashMap = inicializaAtividadesMap();
 
-    private Button credenciamento_button, atividades_button;
-    private Context context = this;
+    private Button credenciamento_button, atividades_button, enviar_presencas_button;
+    private TextView mensagem;
     private SharedPreferences myPrefs;
-    private MenuItem uploadMI;
     private ProgressDialog uploadPD;
 
     private View contentView;
     private View loadingView;
+    private View msgBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,17 +52,43 @@ public class TelaPrincipal extends AppCompatActivity implements View.OnClickList
         loadingView = findViewById(R.id.loading_spinner);
         loadingView.setVisibility(View.GONE);
 
+        msgBar = findViewById(R.id.msg_bar);
+        msgBar.setVisibility(View.GONE);
+
+        uploadPD = new ProgressDialog(this);
+
+        enviar_presencas_button = (Button) findViewById(R.id.msg_button);
+        enviar_presencas_button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                new PostTask().execute();
+            }
+        });
+
+        mensagem = (TextView) findViewById(R.id.msg);
+
         credenciamento_button = (Button) findViewById(R.id.menu_credenciamento);
-        credenciamento_button.setOnClickListener(this);
+        credenciamento_button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                RecognitionSettings recognitionSettings = new RecognitionSettings();
+                recognitionSettings.setRecognizerSettingsArray(new RecognizerSettings[]{new Pdf417RecognizerSettings()});
+                Intent intent = new Intent(getBaseContext(), DefaultScanActivity.class);
+                intent.putExtra(Pdf417ScanActivity.EXTRAS_LICENSE_KEY, NetworkUtils.LICENSE_KEY);
+                intent.putExtra(Pdf417ScanActivity.EXTRAS_RECOGNITION_SETTINGS, recognitionSettings);
+                intent.putExtra(DefaultScanActivity.EXTRA_ID_ATIVIDADE, "0");
+                startActivity(intent);
+            }
+        });
 
         atividades_button = (Button) findViewById(R.id.atividades_button);
-        atividades_button.setOnClickListener(this);
+        atividades_button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivity(new Intent(getBaseContext(), Atividades.class));
+            }
+        });
 
         myPrefs = getSharedPreferences("Lista_de_Atividades", MODE_PRIVATE);
 
         String jsonAtividades = myPrefs.getString("jsonAtividades", "");
-
-        Log.d("TESTE oncreate", jsonAtividades);
 
         if (jsonAtividades.isEmpty()) {
             new JSONGetTask().execute();
@@ -93,28 +99,15 @@ public class TelaPrincipal extends AppCompatActivity implements View.OnClickList
         DataBase.setInstance(this);
     }
 
-    protected void onStart() {
-        super.onStart();
-        if (uploadMI != null) {
-            if (DataBase.getDB().getCountPresencas() != 0) {
-                uploadMI.setEnabled(true);
-                uploadMI.setIcon(R.mipmap.upload_icon_vermelho);
-            }
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkPendencias();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.upload_menu, menu);//Menu Resource, Menu
-        uploadMI = (MenuItem) menu.findItem(R.id.upload_button);
-
-        if (DataBase.getDB().getCountPresencas() == 0) {
-            uploadMI.setEnabled(false);
-            uploadMI.setIcon(R.mipmap.upload_icon);
-        } else {
-            uploadMI.setEnabled(true);
-            uploadMI.setIcon(R.mipmap.upload_icon_vermelho);
-        }
         return true;
     }
 
@@ -123,15 +116,8 @@ public class TelaPrincipal extends AppCompatActivity implements View.OnClickList
         if (item.getItemId() == R.id.refresh_button) {
             new JSONGetTask().execute();
 
-        } else if (item.getItemId() == R.id.upload_button) {
-
-            uploadPD = ProgressDialog.show(context, "Sincronizando registros de presenças", "");
-            uploadPD.setMax(DataBase.getDB().getCountPresencas());
-            uploadPD.setProgress(0);
-
-            new PostTask().execute();
-
-        } else {
+        }
+        else {
             RecognitionSettings recognitionSettings = new RecognitionSettings();
             recognitionSettings.setRecognizerSettingsArray(new RecognizerSettings[]{new Pdf417RecognizerSettings()});
             Intent intent = new Intent(this, DefaultScanActivity.class);
@@ -147,18 +133,13 @@ public class TelaPrincipal extends AppCompatActivity implements View.OnClickList
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onClick(View v) {
-        if (atividades_button.equals(v)) {
-            startActivity(new Intent(this, Atividades.class));
-        } else if (credenciamento_button.equals(v)) {
-            RecognitionSettings recognitionSettings = new RecognitionSettings();
-            recognitionSettings.setRecognizerSettingsArray(new RecognizerSettings[]{new Pdf417RecognizerSettings()});
-            Intent intent = new Intent(this, DefaultScanActivity.class);
-            intent.putExtra(Pdf417ScanActivity.EXTRAS_LICENSE_KEY, NetworkUtils.LICENSE_KEY);
-            intent.putExtra(Pdf417ScanActivity.EXTRAS_RECOGNITION_SETTINGS, recognitionSettings);
-            intent.putExtra(DefaultScanActivity.EXTRA_ID_ATIVIDADE, "0");
-            startActivity(intent);
+    private void checkPendencias(){
+        int nro_pendencias = DataBase.getDB().getCountPresencas();
+        if (nro_pendencias > 0) {
+            msgBar.setVisibility(View.VISIBLE);
+            mensagem.setText(getResources().getString(R.string.msg_dados_pendentes, nro_pendencias));
+        } else {
+            msgBar.setVisibility(View.GONE);
         }
     }
 
@@ -181,7 +162,7 @@ public class TelaPrincipal extends AppCompatActivity implements View.OnClickList
             contentView.setVisibility(View.VISIBLE);
             loadingView.setVisibility(View.GONE);
 
-            if(response != null && !response.isEmpty()){
+            if (response != null && !response.isEmpty()) {
                 Log.d("TESTE onPost", "salvando");
                 SharedPreferences.Editor mEditor = myPrefs.edit();
                 mEditor.putString("jsonAtividades", response);
@@ -195,19 +176,28 @@ public class TelaPrincipal extends AppCompatActivity implements View.OnClickList
         }
     }
 
-    class PostTask extends AsyncTask<Void, String, String> {
+    class PostTask extends AsyncTask<Void, String, Boolean> {
 
-        protected String doInBackground(Void... strings) {
-            NetworkUtils.postAllPresencas(getBaseContext());
-            return null;
+        @Override
+        protected void onPreExecute(){
+                uploadPD.setMessage("Sincronizando registros de presenças");
+                uploadPD.show();
         }
 
-        protected void onPostExecute(String s) {
-//            if (!s.equals(null) && !s.equals("timeOutException")) {
-//                uploadPD.setProgress(uploadPD.getProgress() + 1);
-//                DataBase db = new DataBase(context);
-//                db.deleteEntry(cursor.getInt(cursor.getColumnIndex(DataBase.ID)));
-//            }
+        protected Boolean doInBackground(Void... strings) {
+
+            return NetworkUtils.postAllPresencas(getBaseContext());
+        }
+
+        @Override
+        protected void onPostExecute(Boolean response) {
+            if(response){
+                Toast.makeText(getBaseContext(), "Sucesso", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getBaseContext(), "Erro", Toast.LENGTH_SHORT).show();
+            }
+            uploadPD.dismiss();
+            checkPendencias();
         }
     }
 }

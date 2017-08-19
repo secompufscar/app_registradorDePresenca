@@ -19,6 +19,8 @@
     <color name="divider">#bdbdbd</color>
     <color name="colorBackSplash">#FFF</color>
     <color name="colorButton">#378540</color>
+    <color name="colorMsgBar">#af0006</color>
+
 
     <!--Cores dos tipos de atividade-->
     <color name="palestraColor">#1a3f72</color>

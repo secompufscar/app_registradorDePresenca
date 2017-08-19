@@ -13,7 +13,5 @@
 
     <string name="msg_armazenado_localmente">Não foi possivel conectar-se ao servidor, o registro foi armazenado localmente</string>
     <string name="msg_impossivel_conectar">Impossível conectar ao servidor. Verifique sua conexão com a internet</string>
-
-
-
+    <string name="msg_dados_pendentes">%1$d presenças pendentes de envio</string>
 </resources>
