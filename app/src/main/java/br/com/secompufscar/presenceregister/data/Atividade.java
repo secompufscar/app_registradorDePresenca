@@ -14,7 +14,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -192,10 +191,10 @@ public class Atividade {
     }
 
     public String getLocal() {
-        if (sala == null){
+        if (sala.equals("null")){
             return this.predio;
         } else {
-            return this.predio + ", " + this.sala;
+            return this.predio + ", sala: " + this.sala;
         }
     }
 
@@ -205,10 +204,6 @@ public class Atividade {
 
     public String getMinistrantes() {
         return this.ministrantes;
-    }
-
-    public String getHorariosRaw() {
-        return this.horarios;
     }
 
     public String getDataHoraInicio() {
@@ -268,6 +263,15 @@ public class Atividade {
                 break;
             case "minicurso":
                 color = ContextCompat.getColor(context, R.color.minicursoColor);
+                break;
+            case "workshop":
+                color = ContextCompat.getColor(context, R.color.workshopColor);
+                break;
+            case "mesa-redonda":
+                color = ContextCompat.getColor(context, R.color.mesaredondaColor);
+                break;
+            case "palestra empresarial":
+                color = ContextCompat.getColor(context, R.color.palestraEmpresarialColor);
                 break;
             default:
                 color = ContextCompat.getColor(context, R.color.atividadeDefaultColor);

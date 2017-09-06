@@ -17,7 +17,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -31,7 +30,7 @@ public class NetworkUtils {
     public static String LICENSE_KEY;
     public static final String BASE_URL = "https://secompufscar.com.br/";
     public static final String API_PATH = BASE_URL + "api/";
-    public static final String POST_PATH = "http://192.168.1.173:3000/presencas";
+    public static final String POST_PATH = "http://200.18.97.190:3000/presencas";
 
     public static void inicializeNetworkUtils(String licenseKey) {
         LICENSE_KEY = licenseKey;

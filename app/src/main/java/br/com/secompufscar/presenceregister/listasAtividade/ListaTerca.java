@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.secompufscar.presenceregister.AtividadeDetalhes;
+import br.com.secompufscar.presenceregister.Atividades;
 import br.com.secompufscar.presenceregister.AtividadesAdapter;
 import br.com.secompufscar.presenceregister.ClickListener;
 import br.com.secompufscar.presenceregister.R;
@@ -78,7 +79,7 @@ public class ListaTerca extends Fragment {
 
         atividadeList.clear();
         try {
-            atividadeList.addAll(TelaPrincipal.atividadesHashMap.get(dia_semana));
+            atividadeList.addAll(Atividades.atividadesHashMap.get(dia_semana));
         } catch (Exception e){
             e.printStackTrace();
         }

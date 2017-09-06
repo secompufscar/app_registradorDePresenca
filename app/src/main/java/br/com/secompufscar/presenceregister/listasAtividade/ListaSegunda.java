@@ -9,11 +9,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import br.com.secompufscar.presenceregister.AtividadeDetalhes;
+import br.com.secompufscar.presenceregister.Atividades;
 import br.com.secompufscar.presenceregister.AtividadesAdapter;
 import br.com.secompufscar.presenceregister.ClickListener;
 import br.com.secompufscar.presenceregister.R;
@@ -56,11 +58,15 @@ public class ListaSegunda extends Fragment {
             public void onClick(View view, int position) {
                 Atividade atividade = atividadeList.get(position);
 
-                Context context = view.getContext();
-                Intent detalhesAtividade = new Intent(context, AtividadeDetalhes.class);
-                detalhesAtividade.putExtra(AtividadeDetalhes.EXTRA_POSITION, position);
-                detalhesAtividade.putExtra(AtividadeDetalhes.EXTRA_DIA, atividade.getHorarioDiaSemana());
-                context.startActivity(detalhesAtividade);
+                if (atividade.getTitulo().toLowerCase().equals("credenciamento")) {
+                    Toast.makeText(getContext(), "Utilize o botão de credenciamento na tela principal", Toast.LENGTH_SHORT).show();
+                } else {
+                    Context context = view.getContext();
+                    Intent detalhesAtividade = new Intent(context, AtividadeDetalhes.class);
+                    detalhesAtividade.putExtra(AtividadeDetalhes.EXTRA_POSITION, position);
+                    detalhesAtividade.putExtra(AtividadeDetalhes.EXTRA_DIA, atividade.getHorarioDiaSemana());
+                    context.startActivity(detalhesAtividade);
+                }
             }
 
             @Override
@@ -78,8 +84,8 @@ public class ListaSegunda extends Fragment {
 
         atividadeList.clear();
         try {
-            atividadeList.addAll(TelaPrincipal.atividadesHashMap.get(dia_semana));
-        } catch (Exception e){
+            atividadeList.addAll(Atividades.atividadesHashMap.get(dia_semana));
+        } catch (Exception e) {
             e.printStackTrace();
         }
         adapter.notifyDataSetChanged();

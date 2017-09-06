@@ -31,7 +31,7 @@ public class AtividadeDetalhes extends AppCompatActivity implements OnClickListe
         int posicao = this.getIntent().getIntExtra(EXTRA_POSITION,0);
         String dia_semana = this.getIntent().getStringExtra(EXTRA_DIA);
 
-        atividade = TelaPrincipal.atividadesHashMap.get(dia_semana).get(posicao);
+        atividade = Atividades.atividadesHashMap.get(dia_semana).get(posicao);
 
         nome=(TextView)findViewById(R.id.atividade_detalhe_titulo);
         nome.setText(atividade.getTitulo());

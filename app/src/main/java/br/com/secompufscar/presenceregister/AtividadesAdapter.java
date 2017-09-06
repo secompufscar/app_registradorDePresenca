@@ -55,11 +55,16 @@ public class AtividadesAdapter extends RecyclerView.Adapter<AtividadesAdapter.My
 
             holder.local.setText(local_atividade);
 
-            holder.tipo.setText(atividade.getTipo());
-            holder.horario.setText(atividade.getHorarioInicial());
+            if (!atividade.getTipo().equals("outro")) {
+                holder.tipo.setVisibility(View.VISIBLE);
+                holder.tipo.setText(atividade.getTipo());
+            } else {
+                holder.tipo.setVisibility(View.GONE);
+            }
 
+            holder.horario.setText(atividade.getHorarioInicial());
             holder.layout_tipo.setBackgroundColor(atividade.getColor(context));
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

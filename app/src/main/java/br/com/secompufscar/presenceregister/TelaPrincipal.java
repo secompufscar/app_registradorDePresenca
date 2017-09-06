@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,17 +18,10 @@ import com.microblink.recognizers.blinkbarcode.pdf417.Pdf417RecognizerSettings;
 import com.microblink.recognizers.settings.RecognitionSettings;
 import com.microblink.recognizers.settings.RecognizerSettings;
 
-import java.util.HashMap;
-import java.util.List;
-
 import br.com.secompufscar.presenceregister.data.Atividade;
 import br.com.secompufscar.presenceregister.data.DataBase;
 
-import static br.com.secompufscar.presenceregister.data.Atividade.inicializaAtividadesMap;
-
 public class TelaPrincipal extends AppCompatActivity {
-
-    public static HashMap<String, List<Atividade>> atividadesHashMap = inicializaAtividadesMap();
 
     private Button credenciamento_button, atividades_button, enviar_presencas_button;
     private TextView mensagem;
@@ -88,12 +80,8 @@ public class TelaPrincipal extends AppCompatActivity {
 
         myPrefs = getSharedPreferences("Lista_de_Atividades", MODE_PRIVATE);
 
-        String jsonAtividades = myPrefs.getString("jsonAtividades", "");
-
-        if (jsonAtividades.isEmpty()) {
+        if (myPrefs.getString("jsonAtividades", "").isEmpty()) {
             new JSONGetTask().execute();
-        } else {
-            atividadesHashMap = Atividade.atividadesParseJSON(jsonAtividades);
         }
 
         DataBase.setInstance(this);
@@ -116,8 +104,7 @@ public class TelaPrincipal extends AppCompatActivity {
         if (item.getItemId() == R.id.refresh_button) {
             new JSONGetTask().execute();
 
-        }
-        else {
+        } else {
             RecognitionSettings recognitionSettings = new RecognitionSettings();
             recognitionSettings.setRecognizerSettingsArray(new RecognizerSettings[]{new Pdf417RecognizerSettings()});
             Intent intent = new Intent(this, DefaultScanActivity.class);
@@ -133,7 +120,7 @@ public class TelaPrincipal extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void checkPendencias(){
+    private void checkPendencias() {
         int nro_pendencias = DataBase.getDB().getCountPresencas();
         if (nro_pendencias > 0) {
             msgBar.setVisibility(View.VISIBLE);
@@ -163,15 +150,9 @@ public class TelaPrincipal extends AppCompatActivity {
             loadingView.setVisibility(View.GONE);
 
             if (response != null && !response.isEmpty()) {
-                Log.d("TESTE onPost", "salvando");
                 SharedPreferences.Editor mEditor = myPrefs.edit();
                 mEditor.putString("jsonAtividades", response);
                 mEditor.apply();
-
-                String jsonAtividades = myPrefs.getString("jsonAtividades", "");
-                Log.d("TESTE onPost", jsonAtividades);
-
-                atividadesHashMap = Atividade.atividadesParseJSON(response);
             }
         }
     }
@@ -179,9 +160,9 @@ public class TelaPrincipal extends AppCompatActivity {
     class PostTask extends AsyncTask<Void, String, Boolean> {
 
         @Override
-        protected void onPreExecute(){
-                uploadPD.setMessage("Sincronizando registros de presenças");
-                uploadPD.show();
+        protected void onPreExecute() {
+            uploadPD.setMessage("Sincronizando registros de presenças");
+            uploadPD.show();
         }
 
         protected Boolean doInBackground(Void... strings) {
@@ -191,7 +172,7 @@ public class TelaPrincipal extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Boolean response) {
-            if(response){
+            if (response) {
                 Toast.makeText(getBaseContext(), "Sucesso", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getBaseContext(), "Erro", Toast.LENGTH_SHORT).show();

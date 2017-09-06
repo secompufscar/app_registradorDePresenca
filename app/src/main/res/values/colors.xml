@@ -22,11 +22,12 @@
     <color name="colorMsgBar">#af0006</color>
 
 
-    <!--Cores dos tipos de atividade-->
+    <!-- Cores dos tipos de atividade -->
     <color name="palestraColor">#1a3f72</color>
-    <!--<color name="workshopColor">#000000</color>-->
+    <color name="workshopColor">#3f6db3</color>
     <color name="minicursoColor">#5bb247</color>
-    <!--<color name="mesaredondaColor">#2185d0</color>-->
-    <color name="atividadeDefaultColor">#414141</color>
+    <color name="mesaredondaColor">#3a7b40</color>
+    <color name="palestraEmpresarialColor">#757575</color>
+    <color name="atividadeDefaultColor">#212121</color>
 
 </resources>
