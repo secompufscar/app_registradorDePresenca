@@ -30,7 +30,7 @@ public class NetworkUtils {
     public static String LICENSE_KEY;
     public static final String BASE_URL = "https://secompufscar.com.br/";
     public static final String API_PATH = BASE_URL + "api/";
-    public static final String POST_PATH = "http://200.18.97.190:3000/presencas";
+    public static final String POST_PATH = "http://186.219.92.13:3000/area-administrativa/api/registrar-presenca/";
 
     public static void inicializeNetworkUtils(String licenseKey) {
         LICENSE_KEY = licenseKey;
@@ -120,11 +120,12 @@ public class NetworkUtils {
             OutputStream output = null;
 
             try {
+
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.accumulate("id", presenca.getId());
                 jsonObject.accumulate("id_atividade", presenca.getIdAtividade());
                 jsonObject.accumulate("id_inscricao", presenca.getIdParticipante());
                 jsonObject.accumulate("timestamp", presenca.getHorario());
+                jsonObject.accumulate("api_key", context.getResources().getString(R.string.API_KEY));
 
                 String query = jsonObject.toString();
 
@@ -139,7 +140,7 @@ public class NetworkUtils {
                     connection.setRequestProperty("Accept-Charset", charset);
                     connection.setRequestProperty("Content-Type", "application/json");
 
-                    connection.setConnectTimeout(2000);
+//                    connection.setConnectTimeout(2000);
 
                     output = connection.getOutputStream();
                     output.write(query.getBytes(charset));
@@ -148,7 +149,7 @@ public class NetworkUtils {
                     Scanner scanner = new Scanner(response);
                     responseBody = scanner.useDelimiter("\\A").next();
 
-                    Log.d("teste response", responseBody);
+                    Log.d("teste response", responseBody + " aqui");
                 }
 
             } catch (UnsupportedEncodingException e) {
@@ -169,6 +170,7 @@ public class NetworkUtils {
             }
             return responseBody;
         } else {
+            // TODO: Tratar isso na hora de decodificar a msg, pq está dando crash
             return null;
         }
     }
