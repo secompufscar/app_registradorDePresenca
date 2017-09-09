@@ -37,7 +37,6 @@ public class TelaPrincipal extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         NetworkUtils.inicializeNetworkUtils(getResources().getString(R.string.LICENSE_KEY));
-
         setContentView(R.layout.activity_tela_principal);
 
         contentView = findViewById(R.id.botoes_grid);
@@ -150,6 +149,7 @@ public class TelaPrincipal extends AppCompatActivity {
             loadingView.setVisibility(View.GONE);
 
             if (response != null && !response.isEmpty()) {
+
                 SharedPreferences.Editor mEditor = myPrefs.edit();
                 mEditor.putString("jsonAtividades", response);
                 mEditor.apply();

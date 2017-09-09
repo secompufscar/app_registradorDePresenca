@@ -30,7 +30,7 @@ public class NetworkUtils {
     public static String LICENSE_KEY;
     public static final String BASE_URL = "https://secompufscar.com.br/";
     public static final String API_PATH = BASE_URL + "api/";
-    public static final String POST_PATH = "http://186.219.92.13:3000/area-administrativa/api/registrar-presenca/";
+    public static final String POST_PATH = "https://beta2.secompufscar.com.br/area-administrativa/api/registrar-presenca/";
 
     public static void inicializeNetworkUtils(String licenseKey) {
         LICENSE_KEY = licenseKey;

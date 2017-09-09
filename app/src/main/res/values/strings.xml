@@ -5,8 +5,8 @@
 
 
     <string name="action_settings">Configurações</string>
-    <string name="LightOff">Light: off</string>
-    <string name="LightOn">Light: on</string>
+    <string name="LightOff">OFF</string>
+    <string name="LightOn">ON</string>
     <string name="Back">Back</string>
 
     <string name="atividade_indisponivel_local">Local indisponível</string>

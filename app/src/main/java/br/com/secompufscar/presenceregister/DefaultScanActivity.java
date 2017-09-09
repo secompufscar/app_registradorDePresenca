@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.greycellofp.tastytoast.TastyToast;
 import com.microblink.activity.Pdf417ScanActivity;
 import com.microblink.detectors.DetectorResult;
 import com.microblink.detectors.points.PointsDetectorResult;
@@ -46,22 +47,6 @@ import com.microblink.view.viewfinder.quadview.QuadViewPreset;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.Scanner;
-import java.util.TimeZone;
 
 import br.com.secompufscar.presenceregister.data.DataBase;
 import br.com.secompufscar.presenceregister.data.Presenca;
@@ -412,9 +397,6 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
                 // getStringData getter will return the string version of barcode contents
                 String barcodeData = result.getStringData();
 
-                //TODO: Remover esse teste
-                Toast.makeText(getBaseContext(), barcodeData, Toast.LENGTH_SHORT).show();
-
                 // isUncertain getter will tell you if scanned barcode contains some uncertainties
                 boolean uncertainData = result.isUncertain();
                 // getRawData getter will return the raw data information object of barcode contents
@@ -512,7 +494,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
             presenca.setHorario(Presenca.getCurrentTime());
 
             String response = NetworkUtils.postPresenca(getBaseContext(), presenca);
-
+            //Log.v("Responde:",response);
             if(!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")){
                 if(response.isEmpty()){
                     DataBase.getDB().insertPresenca(presenca);
@@ -525,28 +507,23 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
         @Override
         protected void onPostExecute(String response) {
             //Todo: precisamos da padronização da api para tratar aqui
-            if (!response.isEmpty()) {
-                try {
-                    String toastString;
-                    JSONObject jsonObj = new JSONObject(response);
+            TastyToast.Style tipo = TastyToast.STYLE_ALERT;
+            String toastString = "\nInscrição não encontrada\n";
+            if (response != null) {
+                    try
+                    {
 
-                    if (jsonObj.getString("status").equals("OK")) {
-                        toastString = jsonObj.getString("nome");
-                        if (codigo_atividade.equals("0"))
-                            toastString = toastString + " crendenciado com sucesso!";
-                        else if (!codigo_atividade.equals("-1"))
-                            toastString = "Presença de " + toastString + " confirmada!";
+                        JSONObject resposta = new JSONObject(response);
+                        String pacote = resposta.getString("pacote");
+                        String nome = resposta.getString("nome");
+                        toastString = "Nome: "+nome+"\nPacote: "+pacote;
+                        tipo = TastyToast.STYLE_CONFIRM;
+                    } catch (JSONException e) {
 
-                    } else {
-                        toastString = "código de participante não encontrado";
                     }
-                    Toast.makeText(context, toastString, Toast.LENGTH_SHORT).show();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                Toast.makeText(context, "Tente Novamente", Toast.LENGTH_SHORT).show();
             }
+            TastyToast.makeText(DefaultScanActivity.this, toastString, tipo).enableSwipeDismiss().show();
+
         }
     }
 
