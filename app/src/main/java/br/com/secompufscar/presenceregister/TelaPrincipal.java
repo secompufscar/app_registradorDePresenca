@@ -4,15 +4,15 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.greycellofp.tastytoast.TastyToast;
 import com.microblink.activity.Pdf417ScanActivity;
 import com.microblink.recognizers.blinkbarcode.pdf417.Pdf417RecognizerSettings;
 import com.microblink.recognizers.settings.RecognitionSettings;
@@ -31,6 +31,7 @@ public class TelaPrincipal extends AppCompatActivity {
     private View contentView;
     private View loadingView;
     private View msgBar;
+    private TastyToast msg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,7 +159,6 @@ public class TelaPrincipal extends AppCompatActivity {
     }
 
     class PostTask extends AsyncTask<Void, String, Boolean> {
-
         @Override
         protected void onPreExecute() {
             uploadPD.setMessage("Sincronizando registros de presenças");
@@ -172,10 +172,11 @@ public class TelaPrincipal extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Boolean response) {
+
             if (response) {
-                Toast.makeText(getBaseContext(), "Sucesso", Toast.LENGTH_SHORT).show();
+                msg.makeText(TelaPrincipal.this,getString(R.string.sucesso), TastyToast.STYLE_CONFIRM).enableSwipeDismiss().show();
             } else {
-                Toast.makeText(getBaseContext(), "Erro", Toast.LENGTH_SHORT).show();
+                msg.makeText(TelaPrincipal.this,getString(R.string.erro), TastyToast.STYLE_ALERT).enableSwipeDismiss().show();
             }
             uploadPD.dismiss();
             checkPendencias();

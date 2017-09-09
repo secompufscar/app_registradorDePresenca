@@ -10,7 +10,7 @@ import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
+import android.os.Vibrator;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -57,6 +57,8 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
     //    private String dadoEscaneado;
     private String codigo_atividade;
     private int mScanCount = 0;
+    private TastyToast msg;
+    private Vibrator v;
     private Handler mHandler = new Handler();
     /**
      * RecognizerView is the builtin view that controls camera and recognition
@@ -97,6 +99,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default_scan);
+        v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         context = this;
         // create a scanner view
         mRecognizerView = (RecognizerView) findViewById(R.id.recognizerView);
@@ -380,6 +383,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
      */
     @Override
     public void onScanningDone(RecognitionResults results) {
+        v.vibrate(250);
         mScanCount++;
         StringBuilder sb = new StringBuilder();
         // pause scanning to prevent scan results to come while
@@ -410,7 +414,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
                     if (NetworkUtils.updateConnectionState(getBaseContext())) {
                         new PostTask().execute(barcodeData);
                     } else {
-                        if (!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")) {
+                        if (!codigo_atividade.equals("0") || !codigo_atividade.equals("-1")) {
                             Presenca presenca = new Presenca();
                             presenca.setIdParticipante(barcodeData);
                             presenca.setIdAtividade(codigo_atividade);
@@ -418,9 +422,9 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
 
                             DataBase.getDB().insertPresenca(presenca);
 
-                            Toast.makeText(this, R.string.msg_armazenado_localmente, Toast.LENGTH_LONG).show();
+                            msg.makeText(DefaultScanActivity.this, R.string.msg_armazenado_localmente, TastyToast.STYLE_MESSAGE).enableSwipeDismiss().show();
                         } else {
-                            Toast.makeText(this, R.string.msg_impossivel_conectar, Toast.LENGTH_LONG).show();
+                            msg.makeText(DefaultScanActivity.this, R.string.msg_impossivel_conectar, TastyToast.STYLE_ALERT).enableSwipeDismiss().show();
                         }
                     }
                 }
@@ -494,11 +498,9 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
             presenca.setHorario(Presenca.getCurrentTime());
 
             String response = NetworkUtils.postPresenca(getBaseContext(), presenca);
-            //Log.v("Responde:",response);
             if(!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")){
-                if(response.isEmpty()){
+                if(!response.isEmpty()){
                     DataBase.getDB().insertPresenca(presenca);
-                    Log.d("teste", "salvando presenca no banco");
                 }
             }
             return response;
@@ -522,7 +524,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
 
                     }
             }
-            TastyToast.makeText(DefaultScanActivity.this, toastString, tipo).enableSwipeDismiss().show();
+            msg.makeText(DefaultScanActivity.this, toastString, tipo).enableSwipeDismiss().show();
 
         }
     }

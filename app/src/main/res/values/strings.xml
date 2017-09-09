@@ -14,4 +14,9 @@
     <string name="msg_armazenado_localmente">Não foi possivel conectar-se ao servidor, o registro foi armazenado localmente</string>
     <string name="msg_impossivel_conectar">Impossível conectar ao servidor. Verifique sua conexão com a internet</string>
     <string name="msg_dados_pendentes">%1$d presenças pendentes de envio</string>
+    <string name="LICENSE_KEY">2OZZ6YUU-BUZFWHHY-A5W6C7R5-A5SUJDAU-U5A4ZSBU-2JZKTLQC-HRIN4B3F-ISGEK2CR</string>
+    <string name="API_KEY">kWSR%repF52Jj#3aP%zb</string>
+    <string name="erro">Erro ao sincronizar registro de presenças</string>
+    <string name="sucesso">Sincronizado com sucesso</string>
+
 </resources>
