@@ -2,13 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/menu_verificar"
-        android:icon="@drawable/ic_eye"
-        android:title="Verificar Código"
-        app:showAsAction="ifRoom"/>
-
     <item android:id="@+id/refresh_button"
         android:icon="@drawable/ic_refresh"
+        android:title="Atualizar"
+        app:showAsAction="ifRoom"/>
+    <item android:id="@+id/help"
+        android:icon="@drawable/ic_help"
         android:title="Atualizar"
         app:showAsAction="ifRoom"/>
 </menu>

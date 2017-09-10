@@ -14,9 +14,13 @@
     <string name="msg_armazenado_localmente">Não foi possivel conectar-se ao servidor, o registro foi armazenado localmente</string>
     <string name="msg_impossivel_conectar">Impossível conectar ao servidor. Verifique sua conexão com a internet</string>
     <string name="msg_dados_pendentes">%1$d presenças pendentes de envio</string>
-    <string name="LICENSE_KEY">2OZZ6YUU-BUZFWHHY-A5W6C7R5-A5SUJDAU-U5A4ZSBU-2JZKTLQC-HRIN4B3F-ISGEK2CR</string>
-    <string name="API_KEY">kWSR%repF52Jj#3aP%zb</string>
+
+    
     <string name="erro">Erro ao sincronizar registro de presenças</string>
     <string name="sucesso">Sincronizado com sucesso</string>
+    <string name="help_title">Help dos brother</string>
+    <string name="help_content">Visualizar inscrição - Apenas visualiza a inscrição, sem cadastrar NADA no servidor.  Credenciamento - Valida a inscrição e registra a presença dela no evento  Presença nas atividades - Valida a inscrição em uma atividade selecionada</string>
+    <string name="help_opt">Li aceito e entendi perfeitamente tudo</string>
+    <string name="help_response">Eu realmente espero que sim</string>
 
 </resources>

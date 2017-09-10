@@ -1,8 +1,11 @@
 package br.com.secompufscar.presenceregister;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -11,12 +14,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.greycellofp.tastytoast.TastyToast;
 import com.microblink.activity.Pdf417ScanActivity;
 import com.microblink.recognizers.blinkbarcode.pdf417.Pdf417RecognizerSettings;
 import com.microblink.recognizers.settings.RecognitionSettings;
 import com.microblink.recognizers.settings.RecognizerSettings;
+
+import java.util.Random;
 
 import br.com.secompufscar.presenceregister.data.Atividade;
 import br.com.secompufscar.presenceregister.data.DataBase;
@@ -33,13 +39,26 @@ public class TelaPrincipal extends AppCompatActivity {
     private View msgBar;
     private TastyToast msg;
 
+    private TextView bt1;
+    private TextView bt2;
+    private TextView bt3;
+    private TextView bt4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        NetworkUtils.inicializeNetworkUtils(getResources().getString(R.string.LICENSE_KEY));
         setContentView(R.layout.activity_tela_principal);
 
+
+        bt1 = (TextView)findViewById(R.id.visualizar_inscr);
+        bt2 = (TextView)findViewById(R.id.menu_credenciamento);
+        bt3 = (TextView)findViewById(R.id.atividades_button);
+        bt4 = (TextView)findViewById(R.id.fun);
+
+
+
+
+        NetworkUtils.inicializeNetworkUtils(getResources().getString(R.string.LICENSE_KEY));
         contentView = findViewById(R.id.botoes_grid);
         loadingView = findViewById(R.id.loading_spinner);
         loadingView.setVisibility(View.GONE);
@@ -86,6 +105,30 @@ public class TelaPrincipal extends AppCompatActivity {
 
         DataBase.setInstance(this);
     }
+    public void fun(View view)
+    {
+        Random r = new Random();
+        bt1.setTextColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
+        bt2.setTextColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
+        bt3.setTextColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
+        bt4.setTextColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
+
+        bt1.setBackgroundColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
+        bt2.setBackgroundColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
+        bt3.setBackgroundColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
+        bt4.setBackgroundColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
+    }
+
+    public void visualizarInscr(View v)
+    {
+        RecognitionSettings recognitionSettings = new RecognitionSettings();
+        recognitionSettings.setRecognizerSettingsArray(new RecognizerSettings[]{new Pdf417RecognizerSettings()});
+        Intent intent = new Intent(this, DefaultScanActivity.class);
+        intent.putExtra(Pdf417ScanActivity.EXTRAS_LICENSE_KEY, NetworkUtils.LICENSE_KEY);
+        intent.putExtra(Pdf417ScanActivity.EXTRAS_RECOGNITION_SETTINGS, recognitionSettings);
+        intent.putExtra(DefaultScanActivity.EXTRA_ID_ATIVIDADE, "-1");
+        startActivity(intent);
+    }
 
     @Override
     protected void onResume() {
@@ -104,17 +147,19 @@ public class TelaPrincipal extends AppCompatActivity {
         if (item.getItemId() == R.id.refresh_button) {
             new JSONGetTask().execute();
 
-        } else {
-            RecognitionSettings recognitionSettings = new RecognitionSettings();
-            recognitionSettings.setRecognizerSettingsArray(new RecognizerSettings[]{new Pdf417RecognizerSettings()});
-            Intent intent = new Intent(this, DefaultScanActivity.class);
-            intent.putExtra(Pdf417ScanActivity.EXTRAS_LICENSE_KEY, NetworkUtils.LICENSE_KEY);
-            intent.putExtra(Pdf417ScanActivity.EXTRAS_RECOGNITION_SETTINGS, recognitionSettings);
+        }
+        if (item.getItemId() == R.id.help) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.help_title);
+            builder.setMessage(R.string.help_content);
+            builder.setPositiveButton(R.string.help_opt, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface arg0, int arg1) {
+                    Toast.makeText(getApplicationContext(), R.string.help_response,Toast.LENGTH_SHORT).show();
+                }
+            });
+            builder.create().show();
 
-            if (item.getItemId() == R.id.menu_verificar) {
-                intent.putExtra(DefaultScanActivity.EXTRA_ID_ATIVIDADE, "-1");
-            }
-            startActivity(intent);
+
 
         }
         return super.onOptionsItemSelected(item);

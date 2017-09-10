@@ -500,7 +500,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
             String response = NetworkUtils.postPresenca(getBaseContext(), presenca);
             if(!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")){
                 if(!response.isEmpty()){
-                    DataBase.getDB().insertPresenca(presenca);
+                   // DataBase.getDB().insertPresenca(presenca);
                 }
             }
             return response;

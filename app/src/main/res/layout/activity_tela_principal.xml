@@ -29,24 +29,51 @@
             android:showDividers="beginning"
             android:weightSum="1">
 
+            <Button
+                android:id="@+id/visualizar_inscr"
+                android:layout_width="fill_parent"
+                android:onClick="visualizarInscr"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="25dp"
+                android:text="Visualizar inscrição"
+                android:textColor="#fff"
+                android:background="@color/colorAccent"
+                android:textSize="16dp" />
 
             <Button
                 android:id="@+id/menu_credenciamento"
-                android:layout_width="190dp"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="25dp"
                 android:text="Credenciamento"
-                android:textSize="18sp" />
+                android:textColor="#fff"
+                android:background="@color/colorAccent"
+                android:textSize="16dp" />
 
             <Button
                 android:id="@+id/atividades_button"
-                android:layout_width="190dp"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="25dp"
-                android:text="Atividades"
-                android:textSize="18sp" />
+                android:text="Presença nas atividades"
+                android:textColor="#fff"
+                android:background="@color/colorAccent"
+                android:textSize="16dp" />
+            <Button
+                android:id="@+id/fun"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="50dp"
+                android:onClick="fun"
+                android:text="Disco!"
+                android:textColor="#fff"
+                android:background="@color/colorAccent"
+                android:textSize="16dp" />
+
         </GridLayout>
 
     </LinearLayout>
