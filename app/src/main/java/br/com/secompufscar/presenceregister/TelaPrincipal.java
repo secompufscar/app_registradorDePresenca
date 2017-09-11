@@ -151,7 +151,7 @@ public class TelaPrincipal extends AppCompatActivity {
         if (item.getItemId() == R.id.help) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.help_title);
-            builder.setMessage(R.string.help_content);
+            builder.setMessage("\nVisualizar inscrição - Apenas visualiza a inscrição, sem cadastrar NADA no servidor. \n\nCredenciamento - Valida a inscrição e registra a presença dela no evento  \n\nPresença nas atividades - Valida a inscrição em uma atividade selecionada");
             builder.setPositiveButton(R.string.help_opt, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface arg0, int arg1) {
                     Toast.makeText(getApplicationContext(), R.string.help_response,Toast.LENGTH_SHORT).show();
