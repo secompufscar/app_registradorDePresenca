@@ -62,17 +62,6 @@
                 android:textColor="#fff"
                 android:background="@color/colorAccent"
                 android:textSize="16dp" />
-            <Button
-                android:id="@+id/fun"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="50dp"
-                android:onClick="fun"
-                android:text="Disco!"
-                android:textColor="#fff"
-                android:background="@color/colorAccent"
-                android:textSize="16dp" />
 
         </GridLayout>
 
