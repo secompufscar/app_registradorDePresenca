@@ -11,7 +11,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -57,6 +56,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
 
     private String codigo_atividade;
     private int mScanCount = 0;
+    private boolean postTaskRunning;
     private TastyToast msg;
     private Vibrator v;
     private Handler mHandler = new Handler();
@@ -100,6 +100,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default_scan);
         v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        postTaskRunning = false;
         context = this;
         // create a scanner view
         mRecognizerView = (RecognizerView) findViewById(R.id.recognizerView);
@@ -407,23 +408,25 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
                 // BarcodeDetailedData contains information about barcode's binary layout, if you
                 // are only interested in raw bytes, you can obtain them with getAllData getter
                 if (!uncertainData) {
-                    if (msg == null || msg.getView().getWindowVisibility() != View.VISIBLE) {
-                        if (NetworkUtils.updateConnectionState(getBaseContext())) {
-                            new PostTask().execute(barcodeData);
-                        } else {
-                            if (!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")) {
-                                Presenca presenca = new Presenca();
-                                presenca.setIdParticipante(barcodeData);
-                                presenca.setIdAtividade(codigo_atividade);
-                                presenca.setHorario(Presenca.getCurrentTime());
-
-                                DataBase.getDB().insertPresenca(presenca);
-
-                                msg = TastyToast.makeText(DefaultScanActivity.this, R.string.msg_armazenado_localmente, TastyToast.STYLE_MESSAGE).enableSwipeDismiss();
-                                msg.show();
+                    if (!postTaskRunning){
+                        if (msg == null || msg.getView().getWindowVisibility() != View.VISIBLE) {
+                            if (NetworkUtils.updateConnectionState(getBaseContext())) {
+                                new PostTask().execute(barcodeData);
                             } else {
-                                msg = TastyToast.makeText(DefaultScanActivity.this, R.string.msg_impossivel_conectar, TastyToast.STYLE_ALERT).enableSwipeDismiss();
-                                msg.show();
+                                if (!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")) {
+                                    Presenca presenca = new Presenca();
+                                    presenca.setIdParticipante(barcodeData);
+                                    presenca.setIdAtividade(codigo_atividade);
+                                    presenca.setHorario(Presenca.getCurrentTime());
+
+                                    DataBase.getDB().insertPresenca(presenca);
+
+                                    msg = TastyToast.makeText(DefaultScanActivity.this, R.string.msg_armazenado_localmente, TastyToast.STYLE_MESSAGE).enableSwipeDismiss();
+                                    msg.show();
+                                } else {
+                                    msg = TastyToast.makeText(DefaultScanActivity.this, R.string.msg_impossivel_conectar, TastyToast.STYLE_ALERT).enableSwipeDismiss();
+                                    msg.show();
+                                }
                             }
                         }
                     }
@@ -489,6 +492,10 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
 
     class PostTask extends AsyncTask<String, String, NetworkUtils.PostResponse> {
 
+        protected void onPreExecute(){
+            postTaskRunning = true;
+        }
+
         protected NetworkUtils.PostResponse doInBackground(String... dadoEscaneado) {
             NetworkUtils.PostResponse toastResponse = new NetworkUtils.PostResponse();
 
@@ -516,10 +523,9 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
                 toastResponse.message = "\nInscrição não encontrada\n";
             } else {
                 if (!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")) {
-                    if (response.status_code != 200 && response.status_code != 404) {
-                        presenca.setHorario(Presenca.getCurrentTime());
-                        DataBase.getDB().insertPresenca(presenca);
-                    }
+                    presenca.setHorario(Presenca.getCurrentTime());
+                    DataBase.getDB().insertPresenca(presenca);
+
                     toastResponse.message = "\nOcorreu algum erro, a presença foi salva localmente\n";
                 } else {
                     toastResponse.message = "\nOcorreu algum erro, tente novamente\n";
@@ -537,6 +543,8 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
 
             msg = TastyToast.makeText(DefaultScanActivity.this, response.message, tipo).enableSwipeDismiss();
             msg.show();
+
+            postTaskRunning = false;
         }
     }
 

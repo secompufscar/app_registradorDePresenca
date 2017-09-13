@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -192,11 +191,11 @@ public class TelaPrincipal extends AppCompatActivity {
 
             if (response != null) {
                 if (response.isEmpty()) {
-                    if (DataBase.getDB().getAllEntries().size() == 0){
+                    if (DataBase.getDB().getCountPresencas() == 0){
                         msg.makeText(TelaPrincipal.this, getString(R.string.sucesso), TastyToast.STYLE_CONFIRM).enableSwipeDismiss().show();
                     }
                 } else {
-                    String texto = String.valueOf(response.size()) + " presenças não válidas foram encontradas";
+                    String texto = String.valueOf(response.size()) + " presenças não válidas foram encontradas durante o envio e foram descartadas";
                     msg.makeText(TelaPrincipal.this, texto, TastyToast.STYLE_ALERT).enableSwipeDismiss().show();
                 }
             } else {
