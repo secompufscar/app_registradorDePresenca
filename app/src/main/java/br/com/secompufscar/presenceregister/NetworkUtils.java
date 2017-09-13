@@ -27,9 +27,9 @@ import br.com.secompufscar.presenceregister.data.Presenca;
 public class NetworkUtils {
     public static boolean CONNECTED = false;
 
-    public static final String BASE_URL = "https://secompufscar.com.br/";
+    public static final String BASE_URL = "https://beta2.secompufscar.com.br/";
     public static final String API_PATH = BASE_URL + "api/";
-    public static final String POST_PATH = "https://beta2.secompufscar.com.br/area-administrativa/api/registrar-presenca/";
+    public static final String POST_PATH = BASE_URL + "area-administrativa/api/registrar-presenca/";
 
     public static URL buildUrl(String path) {
 

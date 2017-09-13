@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Registrador de Presenças</string>
+    <string name="app_name">Leitor de Presença</string>
     <string name="title_activity_atividade_detalhe">Detalhe da Atividade</string>
     <string name="title_activity_atividades">Lista de Atividades</string>
 
