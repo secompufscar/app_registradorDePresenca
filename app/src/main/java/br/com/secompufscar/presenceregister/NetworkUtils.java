@@ -27,14 +27,9 @@ import br.com.secompufscar.presenceregister.data.Presenca;
 public class NetworkUtils {
     public static boolean CONNECTED = false;
 
-    public static String LICENSE_KEY;
     public static final String BASE_URL = "https://secompufscar.com.br/";
     public static final String API_PATH = BASE_URL + "api/";
     public static final String POST_PATH = "https://beta2.secompufscar.com.br/area-administrativa/api/registrar-presenca/";
-
-    public static void inicializeNetworkUtils(String licenseKey) {
-        LICENSE_KEY = licenseKey;
-    }
 
     public static URL buildUrl(String path) {
 
@@ -94,10 +89,7 @@ public class NetworkUtils {
     }
 
     public static boolean hostIsAvailable(Context context) {
-
         if (updateConnectionState(context)) {
-            Log.d("teste", "Conectado");
-
             Runtime runtime = Runtime.getRuntime();
             try {
                 Process ipProcess = runtime.exec("/system/bin/ping -c 1 " + BASE_URL);
@@ -113,14 +105,23 @@ public class NetworkUtils {
         return false;
     }
 
-    public static String postPresenca(Context context, Presenca presenca) {
+    static class PostResponse {
+        public int status_code;
+        public String message;
+
+        public PostResponse() {
+            status_code = 0;
+            message = null;
+        }
+    }
+
+    public static PostResponse postPresenca(Context context, Presenca presenca) {
+        PostResponse responsePost = new PostResponse();
         if (updateConnectionState(context)) {
             String charset = "UTF-8";
-            String responseBody = null;
             OutputStream output = null;
 
             try {
-
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.accumulate("id_atividade", presenca.getIdAtividade());
                 jsonObject.accumulate("id_inscricao", presenca.getIdParticipante());
@@ -132,8 +133,6 @@ public class NetworkUtils {
                 URL post_url = buildUrl(POST_PATH);
 
                 if (post_url != null) {
-                    Log.d("TESTE url", post_url.toString());
-
                     HttpURLConnection connection = (HttpURLConnection) post_url.openConnection();
 
                     connection.setDoOutput(true); // Triggers POST.
@@ -145,19 +144,22 @@ public class NetworkUtils {
                     output = connection.getOutputStream();
                     output.write(query.getBytes(charset));
 
-                    InputStream response = connection.getInputStream();
-                    Scanner scanner = new Scanner(response);
-                    responseBody = scanner.useDelimiter("\\A").next();
+                    responsePost.status_code = connection.getResponseCode();
 
-                    Log.d("teste response", responseBody + " aqui");
+                    if (responsePost.status_code == 200) {
+                        InputStream response = connection.getInputStream();
+                        Scanner scanner = new Scanner(response);
+                        responsePost.message = scanner.useDelimiter("\\A").next();
+                    }
                 }
-
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             } catch (SocketTimeoutException e) {
+                e.printStackTrace();
                 Log.d("teste timeoutexception", e.getMessage());
             } catch (IOException e) {
-                Log.d("teste ioexception", e.getMessage());
+                e.printStackTrace();
+                Log.d("teste ioexception", e.toString());
             } catch (JSONException e) {
                 Log.d("teste jsonexception", e.toString());
             } finally {
@@ -168,25 +170,31 @@ public class NetworkUtils {
                     e.printStackTrace();
                 }
             }
-            return responseBody;
-        } else {
-            // TODO: Tratar isso na hora de decodificar a msg, pq está dando crash
-            return null;
+
         }
+
+        return responsePost;
     }
 
-    public static boolean postAllPresencas(Context context) {
+    public static ArrayList<Presenca> postAllPresencas(Context context) {
         if (updateConnectionState(context)) {
             ArrayList<Presenca> presencas = DataBase.getDB().getAllEntries();
+            ArrayList<Presenca> erros = new ArrayList<>();
             for (Presenca presenca : presencas) {
-                String response = postPresenca(context, presenca);
-                // TODO: Verificar se deu certo e excluir;
-                DataBase.getDB().deleteEntry(presenca.getId());
-            }
-            return true;
-        } else {
-            return false;
-        }
+                Log.d("teste presenca", presenca.toString());
+                PostResponse response = postPresenca(context, presenca);
+                Log.d("teste satuscode", String.valueOf(response.status_code));
 
+                if (response.status_code == 200) {
+                    DataBase.getDB().deleteEntry(presenca.getId());
+                } else if (response.status_code == 404){
+                    erros.add(presenca);
+                    DataBase.getDB().deleteEntry(presenca.getId());
+                }
+            }
+            return erros;
+        } else {
+            return null;
+        }
     }
 }

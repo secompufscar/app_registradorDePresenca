@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -54,7 +55,6 @@ import br.com.secompufscar.presenceregister.data.Presenca;
 public class DefaultScanActivity extends Activity implements ScanResultListener, CameraEventsListener, MetadataListener {
     public static final String EXTRA_ID_ATIVIDADE = "id_atividade";
 
-    //    private String dadoEscaneado;
     private String codigo_atividade;
     private int mScanCount = 0;
     private TastyToast msg;
@@ -385,14 +385,12 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
     public void onScanningDone(RecognitionResults results) {
         v.vibrate(250);
         mScanCount++;
-        StringBuilder sb = new StringBuilder();
         // pause scanning to prevent scan results to come while
         // activity is being finished or while we wait for delayed task
         // that will resume scanning
         mRecognizerView.pauseScanning();
         BaseRecognitionResult[] resultArray = results.getRecognitionResults();
 
-        StringBuilder sb2 = new StringBuilder();
 
         for (BaseRecognitionResult res : resultArray) {
 
@@ -408,23 +406,25 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
 
                 // BarcodeDetailedData contains information about barcode's binary layout, if you
                 // are only interested in raw bytes, you can obtain them with getAllData getter
-
                 if (!uncertainData) {
-                    // TODO: Temos que ajustar essa verificação, pode ser que esteja conectado porem sem resposta do servidor
-                    if (NetworkUtils.updateConnectionState(getBaseContext())) {
-                        new PostTask().execute(barcodeData);
-                    } else {
-                        if (!codigo_atividade.equals("0") || !codigo_atividade.equals("-1")) {
-                            Presenca presenca = new Presenca();
-                            presenca.setIdParticipante(barcodeData);
-                            presenca.setIdAtividade(codigo_atividade);
-                            presenca.setHorario(Presenca.getCurrentTime());
-
-                            DataBase.getDB().insertPresenca(presenca);
-
-                            msg.makeText(DefaultScanActivity.this, R.string.msg_armazenado_localmente, TastyToast.STYLE_MESSAGE).enableSwipeDismiss().show();
+                    if (msg == null || msg.getView().getWindowVisibility() != View.VISIBLE) {
+                        if (NetworkUtils.updateConnectionState(getBaseContext())) {
+                            new PostTask().execute(barcodeData);
                         } else {
-                            msg.makeText(DefaultScanActivity.this, R.string.msg_impossivel_conectar, TastyToast.STYLE_ALERT).enableSwipeDismiss().show();
+                            if (!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")) {
+                                Presenca presenca = new Presenca();
+                                presenca.setIdParticipante(barcodeData);
+                                presenca.setIdAtividade(codigo_atividade);
+                                presenca.setHorario(Presenca.getCurrentTime());
+
+                                DataBase.getDB().insertPresenca(presenca);
+
+                                msg = TastyToast.makeText(DefaultScanActivity.this, R.string.msg_armazenado_localmente, TastyToast.STYLE_MESSAGE).enableSwipeDismiss();
+                                msg.show();
+                            } else {
+                                msg = TastyToast.makeText(DefaultScanActivity.this, R.string.msg_impossivel_conectar, TastyToast.STYLE_ALERT).enableSwipeDismiss();
+                                msg.show();
+                            }
                         }
                     }
                 }
@@ -440,7 +440,7 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
             public void run() {
                 mRecognizerView.resumeScanning(true);
             }
-        }, 3000);
+        }, 2000);
 
     }
 
@@ -487,45 +487,56 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
     }
 
 
-    class PostTask extends AsyncTask<String, String, String> {
+    class PostTask extends AsyncTask<String, String, NetworkUtils.PostResponse> {
 
-        protected String doInBackground(String... dadoEscaneado) {
+        protected NetworkUtils.PostResponse doInBackground(String... dadoEscaneado) {
+            NetworkUtils.PostResponse toastResponse = new NetworkUtils.PostResponse();
 
             Presenca presenca = new Presenca();
             presenca.setIdAtividade(codigo_atividade);
             presenca.setIdParticipante(dadoEscaneado[0]);
 
-            presenca.setHorario(Presenca.getCurrentTime());
+            presenca.setHorario(null);
 
-            String response = NetworkUtils.postPresenca(getBaseContext(), presenca);
-            if(!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")){
-                if(!response.isEmpty()){
-                   // DataBase.getDB().insertPresenca(presenca);
+            NetworkUtils.PostResponse response = NetworkUtils.postPresenca(getBaseContext(), presenca);
+
+            toastResponse.status_code = response.status_code;
+
+            if (response.status_code == 200) {
+                try {
+                    JSONObject resposta = new JSONObject(response.message);
+                    String pacote = resposta.getString("pacote");
+                    String nome = resposta.getString("nome");
+                    toastResponse.message = "Nome: " + nome + "\nPacote: " + pacote;
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else if (response.status_code == 404) {
+                toastResponse.message = "\nInscrição não encontrada\n";
+            } else {
+                if (!codigo_atividade.equals("0") && !codigo_atividade.equals("-1")) {
+                    if (response.status_code != 200 && response.status_code != 404) {
+                        presenca.setHorario(Presenca.getCurrentTime());
+                        DataBase.getDB().insertPresenca(presenca);
+                    }
+                    toastResponse.message = "\nOcorreu algum erro, a presença foi salva localmente\n";
+                } else {
+                    toastResponse.message = "\nOcorreu algum erro, tente novamente\n";
                 }
             }
-            return response;
+            return toastResponse;
         }
 
         @Override
-        protected void onPostExecute(String response) {
-            //Todo: precisamos da padronização da api para tratar aqui
+        protected void onPostExecute(NetworkUtils.PostResponse response) {
             TastyToast.Style tipo = TastyToast.STYLE_ALERT;
-            String toastString = "\nInscrição não encontrada\n";
-            if (response != null) {
-                    try
-                    {
-
-                        JSONObject resposta = new JSONObject(response);
-                        String pacote = resposta.getString("pacote");
-                        String nome = resposta.getString("nome");
-                        toastString = "Nome: "+nome+"\nPacote: "+pacote;
-                        tipo = TastyToast.STYLE_CONFIRM;
-                    } catch (JSONException e) {
-
-                    }
+            if (response.status_code == 200) {
+                tipo = TastyToast.STYLE_CONFIRM;
             }
-            msg.makeText(DefaultScanActivity.this, toastString, tipo).enableSwipeDismiss().show();
 
+            msg = TastyToast.makeText(DefaultScanActivity.this, response.message, tipo).enableSwipeDismiss();
+            msg.show();
         }
     }
 

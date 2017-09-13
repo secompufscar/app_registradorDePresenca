@@ -77,7 +77,7 @@ public class AtividadeDetalhes extends AppCompatActivity implements OnClickListe
         // create intent for custom scan activity
         Intent intent = new Intent(this, DefaultScanActivity.class);
         // add license that allows creating custom camera overlay
-        intent.putExtra(Pdf417ScanActivity.EXTRAS_LICENSE_KEY, NetworkUtils.LICENSE_KEY);
+        intent.putExtra(Pdf417ScanActivity.EXTRAS_LICENSE_KEY, getResources().getString(R.string.LICENSE_KEY));
         intent.putExtra(DefaultScanActivity.EXTRA_ID_ATIVIDADE,String.valueOf(atividade.getId()));
         intent.putExtra(Pdf417ScanActivity.EXTRAS_RECOGNITION_SETTINGS, recognitionSettings);
         startActivity(intent);

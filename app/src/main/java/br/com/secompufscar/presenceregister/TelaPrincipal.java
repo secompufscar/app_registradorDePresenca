@@ -5,10 +5,10 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,14 +22,15 @@ import com.microblink.recognizers.blinkbarcode.pdf417.Pdf417RecognizerSettings;
 import com.microblink.recognizers.settings.RecognitionSettings;
 import com.microblink.recognizers.settings.RecognizerSettings;
 
-import java.util.Random;
+import java.util.ArrayList;
 
 import br.com.secompufscar.presenceregister.data.Atividade;
 import br.com.secompufscar.presenceregister.data.DataBase;
+import br.com.secompufscar.presenceregister.data.Presenca;
 
 public class TelaPrincipal extends AppCompatActivity {
 
-    private Button credenciamento_button, atividades_button, enviar_presencas_button;
+    private Button credenciamento_button, atividades_button, enviar_presencas_button, visualizar_inscricao_button;
     private TextView mensagem;
     private SharedPreferences myPrefs;
     private ProgressDialog uploadPD;
@@ -39,26 +40,11 @@ public class TelaPrincipal extends AppCompatActivity {
     private View msgBar;
     private TastyToast msg;
 
-    private TextView bt1;
-    private TextView bt2;
-    private TextView bt3;
-    private TextView bt4;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tela_principal);
 
-
-        bt1 = (TextView)findViewById(R.id.visualizar_inscr);
-        bt2 = (TextView)findViewById(R.id.menu_credenciamento);
-        bt3 = (TextView)findViewById(R.id.atividades_button);
-        bt4 = (TextView)findViewById(R.id.fun);
-
-
-
-
-        NetworkUtils.inicializeNetworkUtils(getResources().getString(R.string.LICENSE_KEY));
         contentView = findViewById(R.id.botoes_grid);
         loadingView = findViewById(R.id.loading_spinner);
         loadingView.setVisibility(View.GONE);
@@ -77,13 +63,26 @@ public class TelaPrincipal extends AppCompatActivity {
 
         mensagem = (TextView) findViewById(R.id.msg);
 
+        visualizar_inscricao_button = (Button) findViewById(R.id.visualizar_inscr);
+        visualizar_inscricao_button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                RecognitionSettings recognitionSettings = new RecognitionSettings();
+                recognitionSettings.setRecognizerSettingsArray(new RecognizerSettings[]{new Pdf417RecognizerSettings()});
+                Intent intent = new Intent(getBaseContext(), DefaultScanActivity.class);
+                intent.putExtra(Pdf417ScanActivity.EXTRAS_LICENSE_KEY, getResources().getString(R.string.LICENSE_KEY));
+                intent.putExtra(Pdf417ScanActivity.EXTRAS_RECOGNITION_SETTINGS, recognitionSettings);
+                intent.putExtra(DefaultScanActivity.EXTRA_ID_ATIVIDADE, "-1");
+                startActivity(intent);
+            }
+        });
+
         credenciamento_button = (Button) findViewById(R.id.menu_credenciamento);
         credenciamento_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 RecognitionSettings recognitionSettings = new RecognitionSettings();
                 recognitionSettings.setRecognizerSettingsArray(new RecognizerSettings[]{new Pdf417RecognizerSettings()});
                 Intent intent = new Intent(getBaseContext(), DefaultScanActivity.class);
-                intent.putExtra(Pdf417ScanActivity.EXTRAS_LICENSE_KEY, NetworkUtils.LICENSE_KEY);
+                intent.putExtra(Pdf417ScanActivity.EXTRAS_LICENSE_KEY, getResources().getString(R.string.LICENSE_KEY));
                 intent.putExtra(Pdf417ScanActivity.EXTRAS_RECOGNITION_SETTINGS, recognitionSettings);
                 intent.putExtra(DefaultScanActivity.EXTRA_ID_ATIVIDADE, "0");
                 startActivity(intent);
@@ -104,30 +103,6 @@ public class TelaPrincipal extends AppCompatActivity {
         }
 
         DataBase.setInstance(this);
-    }
-    public void fun(View view)
-    {
-        Random r = new Random();
-        bt1.setTextColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
-        bt2.setTextColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
-        bt3.setTextColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
-        bt4.setTextColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
-
-        bt1.setBackgroundColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
-        bt2.setBackgroundColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
-        bt3.setBackgroundColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
-        bt4.setBackgroundColor(Color.rgb(r.nextInt(255),r.nextInt(255),r.nextInt(255)));
-    }
-
-    public void visualizarInscr(View v)
-    {
-        RecognitionSettings recognitionSettings = new RecognitionSettings();
-        recognitionSettings.setRecognizerSettingsArray(new RecognizerSettings[]{new Pdf417RecognizerSettings()});
-        Intent intent = new Intent(this, DefaultScanActivity.class);
-        intent.putExtra(Pdf417ScanActivity.EXTRAS_LICENSE_KEY, NetworkUtils.LICENSE_KEY);
-        intent.putExtra(Pdf417ScanActivity.EXTRAS_RECOGNITION_SETTINGS, recognitionSettings);
-        intent.putExtra(DefaultScanActivity.EXTRA_ID_ATIVIDADE, "-1");
-        startActivity(intent);
     }
 
     @Override
@@ -154,13 +129,10 @@ public class TelaPrincipal extends AppCompatActivity {
             builder.setMessage("\nVisualizar inscrição - Apenas visualiza a inscrição, sem cadastrar NADA no servidor. \n\nCredenciamento - Valida a inscrição e registra a presença dela no evento  \n\nPresença nas atividades - Valida a inscrição em uma atividade selecionada");
             builder.setPositiveButton(R.string.help_opt, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface arg0, int arg1) {
-                    Toast.makeText(getApplicationContext(), R.string.help_response,Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), R.string.help_response, Toast.LENGTH_SHORT).show();
                 }
             });
             builder.create().show();
-
-
-
         }
         return super.onOptionsItemSelected(item);
     }
@@ -203,30 +175,36 @@ public class TelaPrincipal extends AppCompatActivity {
         }
     }
 
-    class PostTask extends AsyncTask<Void, String, Boolean> {
+    private class PostTask extends AsyncTask<Void, String, ArrayList<Presenca>> {
         @Override
         protected void onPreExecute() {
             uploadPD.setMessage("Sincronizando registros de presenças");
             uploadPD.show();
         }
 
-        protected Boolean doInBackground(Void... strings) {
+        protected ArrayList<Presenca> doInBackground(Void... strings) {
 
             return NetworkUtils.postAllPresencas(getBaseContext());
         }
 
         @Override
-        protected void onPostExecute(Boolean response) {
+        protected void onPostExecute(ArrayList<Presenca> response) {
 
-            if (response) {
-                msg.makeText(TelaPrincipal.this,getString(R.string.sucesso), TastyToast.STYLE_CONFIRM).enableSwipeDismiss().show();
+            if (response != null) {
+                if (response.isEmpty()) {
+                    if (DataBase.getDB().getAllEntries().size() == 0){
+                        msg.makeText(TelaPrincipal.this, getString(R.string.sucesso), TastyToast.STYLE_CONFIRM).enableSwipeDismiss().show();
+                    }
+                } else {
+                    String texto = String.valueOf(response.size()) + " presenças não válidas foram encontradas";
+                    msg.makeText(TelaPrincipal.this, texto, TastyToast.STYLE_ALERT).enableSwipeDismiss().show();
+                }
             } else {
-                msg.makeText(TelaPrincipal.this,getString(R.string.erro), TastyToast.STYLE_ALERT).enableSwipeDismiss().show();
+                msg.makeText(TelaPrincipal.this, getString(R.string.erro), TastyToast.STYLE_ALERT).enableSwipeDismiss().show();
             }
             uploadPD.dismiss();
             checkPendencias();
         }
     }
 }
-
 
