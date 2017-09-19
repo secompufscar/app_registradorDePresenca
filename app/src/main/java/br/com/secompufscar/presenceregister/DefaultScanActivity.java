@@ -540,9 +540,11 @@ public class DefaultScanActivity extends Activity implements ScanResultListener,
             if (response.status_code == 200) {
                 tipo = TastyToast.STYLE_CONFIRM;
             }
-
-            msg = TastyToast.makeText(DefaultScanActivity.this, response.message, tipo).enableSwipeDismiss();
+            if(msg!=null)
+                msg.cancel();
+            msg = TastyToast.makeText(DefaultScanActivity.this, response.message, tipo).enableSwipeDismiss().enableVariableDuration();
             msg.show();
+            msg = null;
 
             postTaskRunning = false;
         }
